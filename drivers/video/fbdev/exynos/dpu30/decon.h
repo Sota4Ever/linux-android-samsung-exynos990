@@ -120,6 +120,8 @@ extern struct decon_bts_ops decon_bts_control;
 #endif
 
 void dpu_debug_printk(const char *function_name, const char *format, ...);
+
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 #define decon_err(fmt, ...)							\
 	do {									\
 		if (decon_log_level >= 3) {					\
@@ -211,6 +213,27 @@ void dpu_debug_printk(const char *function_name, const char *format, ...);
 		if (dpu_dma_buf_log_level >= 7)					\
 			dpu_debug_printk("DMA_BUF", fmt,  ##args);			\
 	} while (0)
+
+#else
+
+/* Let's not waste CPU cycles on checking loglevel */
+#define DPU_DEBUG_DMA_BUF(fmt, args...)
+#define DPU_ERR_FENCE(fmt, args...)	
+#define DPU_INFO_FENCE(fmt, args...)
+#define DPU_DEBUG_FENCE(fmt, args...)
+#define DPU_ERR_MRES(fmt, args...)
+#define DPU_INFO_MRES(fmt, args...)
+#define DPU_DEBUG_MRES(fmt, args...)
+#define DPU_ERR_BTS(fmt, args...)
+#define DPU_INFO_BTS(fmt, args...)
+#define DPU_DEBUG_BTS(fmt, args...)
+#define DPU_DEBUG_WIN(fmt, args...)	
+#define decon_info(fmt, ...)
+#define decon_warn(fmt, ...)
+#define decon_err(fmt, ...)
+#define decon_dbg(fmt, ...)
+#endif
+
 #ifdef CONFIG_EXYNOS_MCD_HDR
 #define IS_HDR_FMT(hdr_std) ((hdr_std == DPP_HDR_ST2084) || (hdr_std == DPP_HDR_HLG))
 #endif

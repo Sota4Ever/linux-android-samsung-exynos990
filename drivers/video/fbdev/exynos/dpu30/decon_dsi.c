@@ -1412,7 +1412,9 @@ int decon_exit_hiber(struct decon_device *decon)
 	int ret = 0;
 	struct decon_param p;
 	struct decon_mode_info psr;
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	enum decon_state prev_state = decon->state;
+#endif
 #ifdef CONFIG_PROFILE_WINCONFIG
 	s64 hiber_lock_time;
 	s64 hiber_dsim_time;
@@ -1493,8 +1495,10 @@ int decon_exit_hiber(struct decon_device *decon)
 
 	decon_hiber_trig_reset(decon);
 
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	decon_dbg("decon-%d %s - (state:%d -> %d)\n",
 			decon->id, __func__, prev_state, decon->state);
+#endif
 	decon->hiber.exit_cnt++;
 	DPU_EVENT_LOG(DPU_EVT_EXIT_HIBER, &decon->sd, start);
 #ifdef CONFIG_SUPPORT_DISPLAY_PROFILER
@@ -1524,8 +1528,9 @@ int decon_enter_hiber(struct decon_device *decon)
 {
 	int ret = 0;
 	struct decon_mode_info psr;
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	enum decon_state prev_state = decon->state;
-
+#endif
 	DPU_EVENT_START();
 
 	if (!decon->hiber.enabled)
@@ -1600,8 +1605,10 @@ err:
 err2:
 	mutex_unlock(&decon->hiber.lock);
 
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	decon_dbg("decon-%d %s - (state:%d -> %d)\n",
 			decon->id, __func__, prev_state, decon->state);
+#endif
 
 	return ret;
 }

@@ -14,12 +14,14 @@
 
 #include "decon.h"
 
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 static char *fence_evt[] = {
 	"CREATE_RETIRE_FENCE",
 	"CREATE_RELEASE_FENCE_FDS",
 	"WAIT_ACQUIRE_FENCE",
 	"SIGNAL_RETIRE_FENCE",
 };
+#endif
 
 /* sync fence related functions */
 void decon_create_timeline(struct decon_device *decon, char *name)
@@ -93,10 +95,12 @@ void decon_create_release_fences(struct decon_device *decon,
 			dpu_save_fence_info(rel_fence, fence, &release);
 			DPU_F_EVT_LOG(DPU_F_EVT_CREATE_RELEASE_FENCE_FDS,
 					&decon->sd, &release);
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 			DPU_DEBUG_FENCE("[%s] %s: seqno(%d), fd(%d), flags(0x%x)\n",
 					fence_evt[DPU_F_EVT_CREATE_RELEASE_FENCE_FDS],
 					release.name, release.seqno, release.fd,
 					release.flags);
+#endif
 		}
 		win_data->config[i].rel_fence = rel_fence;
 	}
@@ -167,9 +171,11 @@ int decon_create_fence(struct decon_device *decon, struct sync_file **sync_file)
 
 	dpu_save_fence_info(fd, fence, &retire);
 	DPU_F_EVT_LOG(DPU_F_EVT_CREATE_RETIRE_FENCE, &decon->sd, &retire);
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	DPU_DEBUG_FENCE("[%s] %s: ctx(%llu) seqno(%d), fd(%d), flags(0x%lx)\n",
 			fence_evt[DPU_F_EVT_CREATE_RETIRE_FENCE], retire.name,
 			retire.context, retire.seqno, retire.fd, retire.flags);
+#endif
 
 	return fd;
 }
@@ -182,14 +188,18 @@ int decon_wait_fence(struct decon_device *decon, struct dma_fence *fence, int fd
 	int ret = 1;
 
 	struct dpu_fence_info in_fence;
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REFERT
 	ktime_t time = ktime_get();
+#endif
 
 	dpu_save_fence_info(fd, fence, &in_fence);
 
 	DPU_F_EVT_LOG(DPU_F_EVT_WAIT_ACQUIRE_FENCE, &decon->sd, &in_fence);
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	DPU_DEBUG_FENCE("[%s] %s: ctx(%llu), seqno(%d), fd(%d), flags(0x%lx)\n",
 			fence_evt[DPU_F_EVT_WAIT_ACQUIRE_FENCE], in_fence.name,
 			in_fence.context, in_fence.seqno, in_fence.fd, in_fence.flags);
+#endif
 
 	err = dma_fence_wait_timeout(fence, false, msecs_to_jiffies(600));
 	if (err <= 0) {
@@ -213,6 +223,7 @@ int decon_wait_fence(struct decon_device *decon, struct dma_fence *fence, int fd
 		}
 	}
 
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	if ((err <= 0) || (fence_err <= 0)) {
 		decon_err("\t%s: ctx(%llu), seqno(%d), fd(%d), flags(0x%lx), err(%d:%d), remaining_frame(%d), elapsed(%lldusec)\n",
 			in_fence.name, in_fence.context, in_fence.seqno,
@@ -220,6 +231,7 @@ int decon_wait_fence(struct decon_device *decon, struct dma_fence *fence, int fd
 			atomic_read(&decon->up.remaining_frame),
 			ktime_to_us(ktime_sub(ktime_get(), time)));
 	}
+#endif
 
 	return ret;
 }
@@ -240,7 +252,9 @@ void decon_signal_fence(struct decon_device *decon, struct dma_fence *fence)
 
 	dpu_save_fence_info(0, fence, &retire);
 	DPU_F_EVT_LOG(DPU_F_EVT_SIGNAL_RETIRE_FENCE, &decon->sd, &retire);
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	DPU_DEBUG_FENCE("[%s] %s: ctx(%llu), seqno(%d), flags(0x%lx)\n",
 			fence_evt[DPU_F_EVT_SIGNAL_RETIRE_FENCE], retire.name,
 			retire.context, retire.seqno, retire.flags);
+#endif
 }

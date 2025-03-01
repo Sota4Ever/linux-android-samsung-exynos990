@@ -1410,6 +1410,7 @@ void decon_hiber_finish(struct decon_device *decon)
 	decon->hiber.profile_exit_cnt++;
 }
 
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 static int decon_get_hiber_ratio(struct decon_device *decon)
 {
 	s64 residency = decon->hiber.hiber_time;
@@ -1422,6 +1423,7 @@ static int decon_get_hiber_ratio(struct decon_device *decon)
 
 	return residency;
 }
+#endif
 
 static void _decon_profile_hiber_show(struct decon_device *decon)
 {
@@ -1433,7 +1435,9 @@ static void _decon_profile_hiber_show(struct decon_device *decon)
 	decon_info("#########################################\n");
 	decon_info("Profiling Time: %llu us\n", decon->hiber.profile_time);
 	decon_info("Hibernation Entry Time: %llu us\n", decon->hiber.hiber_time);
+#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
 	decon_info("Hibernation Entry Ratio: %d %%\n", decon_get_hiber_ratio(decon));
+#endif
 	decon_info("Entry count: %d, Exit count: %d\n", decon->hiber.profile_enter_cnt,
 			decon->hiber.profile_exit_cnt);
 	decon_info("Framedone count: %d, FPS: %lld\n", decon->hiber.frame_cnt,
