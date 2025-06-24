@@ -520,6 +520,7 @@ struct modem_irq {
 #define FUNC	(__func__)
 #define CALLER	(__builtin_return_address(0))
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 #define mif_err_limited(fmt, ...) \
 	printk_ratelimited(KERN_ERR LOG_TAG "%s: " pr_fmt(fmt), __func__, ##__VA_ARGS__)
 #define mif_err(fmt, ...) \
@@ -531,5 +532,12 @@ struct modem_irq {
 #define mif_trace(fmt, ...) \
 	printk(KERN_DEBUG "mif: %s: %d: called(%pF): " fmt, \
 		__func__, __LINE__, __builtin_return_address(0), ##__VA_ARGS__)
+#else
+#define mif_err_limited(fmt, ...)
+#define mif_err(fmt, ...)
+#define mif_debug(fmt, ...)
+#define mif_info(fmt, ...)
+#define mif_trace(fmt, ...)
+#endif
 
 #endif
