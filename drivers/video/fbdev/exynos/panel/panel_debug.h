@@ -20,6 +20,7 @@
 extern int panel_log_level;
 extern int panel_cmd_log;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 #define panel_err(fmt, ...)							\
 	do {									\
 		if (panel_log_level >= 3)					\
@@ -101,6 +102,20 @@ extern int panel_cmd_log;
 					(panel_dev) ? (panel_dev)->id : 0, \
 					__func__, ##__VA_ARGS__);			\
 	} while (0)
+#else
+#define panel_err(fmt, ...)
+#define panel_warn(fmt, ...)
+#define panel_info(fmt, ...)
+#define panel_dbg(fmt, ...)
+#define panel_ext_err(_tag_, fmt, ...)
+#define panel_ext_warn(_tag_, fmt, ...)
+#define panel_ext_info(_tag_, fmt, ...)
+#define panel_ext_dbg(_tag_, fmt, ...)
+#define panel_dev_err(panel_dev, fmt, ...)
+#define panel_dev_warn(panel_dev, fmt, ...)
+#define panel_dev_info(panel_dev, fmt, ...)
+#define panel_dev_dbg(panel_dev, fmt, ...)
+#endif
 
 enum {
 	PANEL_DEBUGFS_LOG,
