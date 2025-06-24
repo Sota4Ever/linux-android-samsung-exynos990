@@ -258,9 +258,11 @@ static int vts_start_ipc_transaction_atomic(struct device *dev, struct vts_data 
 	volatile enum ipc_state *state = &data->ipc_state_ap;
 	unsigned long flag;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "%s:++ msg:%d, values: 0x%08x, 0x%08x, 0x%08x\n",
 					__func__, msg, (*values)[0],
 					(*values)[1], (*values)[2]);
+#endif
 
 	/* Check VTS state before processing IPC,
 	 * in VTS_STATE_RUNTIME_SUSPENDING state only Power Down IPC
@@ -363,7 +365,9 @@ static int vts_start_ipc_transaction_atomic(struct device *dev, struct vts_data 
 	*state = IDLE;
 
 	spin_unlock(&data->ipc_spinlock);
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "%s:-- msg:%d \n", __func__, msg);
+#endif
 
 	return (int)result;
 }
@@ -497,7 +501,9 @@ static int vts_download_firmware(struct platform_device *pdev)
 {
 	struct vts_data *data = platform_get_drvdata(pdev);
 	struct device *dev = &pdev->dev;
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "%s\n", __func__);
+#endif
 
 	if (!data->firmware) {
 		dev_err(dev, "firmware is not loaded\n");
@@ -505,7 +511,9 @@ static int vts_download_firmware(struct platform_device *pdev)
 	}
 
 	memcpy(data->sram_base, data->firmware->data, data->firmware->size);
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "firmware is downloaded to %pK (size=%zu)\n", data->sram_base, data->firmware->size);
+#endif
 
 	return 0;
 }
@@ -591,7 +599,9 @@ static int vts_clk_set_rate(struct device *dev, unsigned long combination)
 	unsigned long dmic_rate, dmic_sync, dmic_if;
 	int result;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "%s(%lu)\n", __func__, combination);
+#endif
 
 	switch (combination) {
 	case 2:
@@ -625,21 +635,27 @@ static int vts_clk_set_rate(struct device *dev, unsigned long combination)
 		dev_err(dev, "Failed to set rate of the clock %s\n", "dmic_if");
 		goto out;
 	}
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "DMIC IF clock rate: %lu\n", clk_get_rate(data->clk_dmic_if));
+#endif
 
 	result = clk_set_rate(data->clk_dmic_sync, dmic_sync);
 	if (result < 0) {
 		dev_err(dev, "Failed to set rate of the clock %s\n", "dmic_sync");
 		goto out;
 	}
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "DMIC SYNC clock rate: %lu\n", clk_get_rate(data->clk_dmic_sync));
+#endif
 
 	result = clk_set_rate(data->clk_dmic, dmic_rate);
 	if (result < 0) {
 		dev_err(dev, "Failed to set rate of the clock %s\n", "dmic");
 		goto out;
 	}
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "DMIC clock rate: %lu\n", clk_get_rate(data->clk_dmic));
+#endif
 
 out:
 	return result;
@@ -727,7 +743,9 @@ EXPORT_SYMBOL(vts_clear_sram);
 
 volatile bool vts_is_on(void)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	pr_info("vts_is_on : %d\n", (p_vts_data && p_vts_data->enabled));
+#endif
 	return p_vts_data && p_vts_data->enabled;
 }
 EXPORT_SYMBOL(vts_is_on);
@@ -841,8 +859,10 @@ static void vts_complete_firmware_request(const struct firmware *fw, void *conte
 	pversion = (unsigned int*) (fw->data + DETLIB_VERSION_OFFSET);
 	data->vtsdetectlib_version = *pversion;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "Firmware loaded at %p (%zu)\n", fw->data, fw->size);
 	dev_info(dev, "Firmware version: 0x%x Detection library version: 0x%x\n", data->vtsfw_version, data->vtsdetectlib_version);
+#endif
 }
 
 static int vts_try_request_firmware(struct vts_data *data)
@@ -868,16 +888,20 @@ static int vts_start_recognization(struct device *dev, int start)
 	int result;
 	u32 values[3];
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "%s for %s\n", __func__, vtsactive_phrase_text[active_trigger]);
+#endif
 
 	start = !!start;
 	if (start) {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(dev, "%s for %s G-loaded:%d s-loaded: %d\n", __func__,
 				 vtsactive_phrase_text[active_trigger],
 				 data->google_info.loaded,
 				 data->svoice_info.loaded);
 		dev_info(dev, "%s exec_mode %d active_trig :%d\n", __func__,
 				 data->exec_mode, active_trigger);
+#endif
 		if (!(data->exec_mode & (0x1 << VTS_SOUND_DETECT_MODE))) {
 			if (active_trigger == TRIGGER_SVOICE &&
 				 data->svoice_info.loaded) {
@@ -893,8 +917,10 @@ static int vts_start_recognization(struct device *dev, int start)
 				}
 				memcpy(data->sram_base + SOUND_MODEL_SVOICE_OFFSET, data->svoice_info.data,
 					data->svoice_info.actual_sz);
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 				dev_info(dev, "svoice.bin Binary uploaded size=%zu\n",
 						data->svoice_info.actual_sz);
+#endif
 
 			} else if (active_trigger == TRIGGER_GOOGLE &&
 				data->google_info.loaded) {
@@ -910,8 +936,10 @@ static int vts_start_recognization(struct device *dev, int start)
 				}
 				memcpy(data->sram_base + SOUND_MODEL_GOOGLE_OFFSET, data->google_info.data,
 					data->google_info.actual_sz);
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 				dev_info(dev, "google.bin Binary uploaded size=%zu\n",
 						data->google_info.actual_sz);
+#endif
 			} else {
 				dev_err(dev, "%s Model Binary File not Loaded\n", __func__);
 				return -EINVAL;
@@ -952,8 +980,9 @@ static int vts_start_recognization(struct device *dev, int start)
 		}
 
 		data->vts_state = VTS_STATE_RECOG_STARTED;
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(dev, "%s start=%d, active_trigger=%d\n", __func__, start, active_trigger);
-
+#endif
 	} else if (!start) {
 		values[0] = 1 << active_trigger;
 		values[1] = 0;
@@ -1106,9 +1135,11 @@ static int set_vtsvoicerecognize_mode(struct snd_kcontrol *kcontrol,
 		else
 			data->voicerecog_start &= ~(0x1 << data->active_trigger);
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(dev, "%s Configured: [%d] %s started\n",
 			 __func__, data->exec_mode,
 			 vtsvcrecog_mode_text[vcrecognize_mode]);
+#endif
 
 		if (!vcrecognize_start &&
 				pm_runtime_active(dev)) {
@@ -1211,9 +1242,12 @@ static int set_vtsexec_mode(struct snd_kcontrol *kcontrol,
 		else
 			data->exec_mode &= ~(0x1 << (vtsexecution_mode -
 						VTS_SENSORY_TRIGGER_MODE));
+
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(component->dev, "%s Configured: [%d] %s\n",
 			 __func__, data->exec_mode,
 			 vtsexec_mode_text[vtsexecution_mode]);
+#endif
 
 		if (data->exec_mode == VTS_OFF_MODE &&
 			 pm_runtime_active(component->dev)) {
@@ -1269,8 +1303,10 @@ static int get_voicetrigger_value(struct snd_kcontrol *kcontrol,
 
 	ucontrol->value.integer.value[0] = data->target_size;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(component->dev, "GET Voice Trigger Value: %d \n",
 			data->target_size);
+#endif
 
 	return 0;
 }
@@ -1321,8 +1357,10 @@ static int set_voicetrigger_value(struct snd_kcontrol *kcontrol,
 		}
 
 		data->target_size = trig_ms;
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(component->dev, "SET Voice Trigger Value: %dms\n",
 			data->target_size);
+#endif
 	}
 
 	return  0;
@@ -1605,7 +1643,9 @@ static irqreturn_t vts_boot_completed_handler(int irq, void *dev_id)
 	vts_ipc_ack(data, 1);
 	wake_up(&data->ipc_wait_queue);
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "VTS boot completed\n");
+#endif
 
 	return IRQ_HANDLED;
 }
@@ -2268,7 +2308,9 @@ int vts_start_runtime_resume(struct device *dev, int skip_log)
 		dev_err(dev, "Failed to enable the clock\n");
 		goto error_clk;
 	}
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(dev, "dmic clock rate:%lu\n", clk_get_rate(data->clk_dmic));
+#endif
 
 #if !(defined(CONFIG_SOC_EXYNOS9820) || defined(CONFIG_SOC_EXYNOS9830))
 	vts_cpu_power(true);
