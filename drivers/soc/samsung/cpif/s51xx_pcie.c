@@ -77,6 +77,7 @@ static const struct file_operations s51xx_pcie_proc_fops = {
 
 void s51xx_pcie_chk_ep_conf(struct pci_dev *pdev)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	int i;
 	u32 val1, val2, val3, val4;
 
@@ -108,6 +109,7 @@ void s51xx_pcie_chk_ep_conf(struct pci_dev *pdev)
 	dev_info(&pdev->dev, "0x%02x:  %08x\n",
 			i, val1);
 	*/
+#endif
 }
 
 inline int s51xx_pcie_send_doorbell_int(struct pci_dev *pdev, int int_num)

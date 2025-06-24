@@ -295,6 +295,7 @@ void set_dflags(unsigned long flag)
 
 static inline bool log_enabled(u8 ch, struct link_device *ld)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	unsigned long flags = get_log_flags();
 
 	if (test_bit(DEBUG_FLAG_ALL, &flags))
@@ -318,6 +319,9 @@ static inline bool log_enabled(u8 ch, struct link_device *ld)
 	if (ld->is_dump_ch(ch))
 		return test_bit(DEBUG_FLAG_DUMP, &flags);
 	return 0;
+#else
+	return 0;
+#endif
 }
 
 /* print ipc packet */
