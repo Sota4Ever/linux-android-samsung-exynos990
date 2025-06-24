@@ -725,7 +725,9 @@ static int exynos_read_raw(struct iio_dev *indio_dev,
 		dev_warn(&indio_dev->dev, "Conversion timed out! Resetting\n");
 		ret = -ETIMEDOUT;
 	} else {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 		dev_info(&indio_dev->dev, "Exynos ADC value = %d\n", *val);
+#endif
 		*val = info->value;
 		*val2 = 0;
 		ret = IIO_VAL_INT;
