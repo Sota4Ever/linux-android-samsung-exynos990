@@ -42,7 +42,9 @@ struct tz_iwlog_print_state {
 
 static atomic_t tz_iwlog_init_done = ATOMIC_INIT(0);
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 static DEFINE_PER_CPU(struct tz_iwlog_print_state, tz_iwlog_print_state);
+#endif
 static DEFINE_PER_CPU(struct circ_buf *, tz_iwlog_buffer);
 
 static DECLARE_WAIT_QUEUE_HEAD(tz_iwlog_wq);
@@ -52,6 +54,7 @@ static struct task_struct *tz_iwlog_kthread;
 
 static void tz_iwlog_buffer_print(const char *buf, unsigned int count)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	struct tz_iwlog_print_state *ps;
 	unsigned int avail, bytes_in, bytes_out, bytes_printed, tmp, wait_dta;
 	char *p;
@@ -108,6 +111,7 @@ static void tz_iwlog_buffer_print(const char *buf, unsigned int count)
 	}
 
 	put_cpu_var(tz_iwlog_print_state);
+#endif
 }
 
 static void tz_iwlog_read_buffers(void)
