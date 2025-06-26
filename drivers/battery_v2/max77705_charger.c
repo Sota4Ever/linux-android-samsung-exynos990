@@ -100,6 +100,7 @@ static void check_charger_unlock_state(struct max77705_charger_data *charger)
 
 static void max77705_test_read(struct max77705_charger_data *charger)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	u8 data = 0;
 	u32 addr = 0;
 	char str[1024] = { 0, };
@@ -109,6 +110,7 @@ static void max77705_test_read(struct max77705_charger_data *charger)
 		sprintf(str + strlen(str), "[0x%02x]0x%02x, ", addr, data);
 	}
 	pr_info("max77705 : %s\n", str);
+#endif
 }
 
 static int max77705_get_autoibus(struct max77705_charger_data *charger)

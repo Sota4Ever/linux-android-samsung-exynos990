@@ -116,6 +116,7 @@ set_default_value:
 
 static void max77705_fg_periodic_read(struct max77705_fuelgauge_data *fuelgauge)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	u8 reg;
 	int i, data[0x10];
 	char *str = NULL;
@@ -150,10 +151,13 @@ static void max77705_fg_periodic_read(struct max77705_fuelgauge_data *fuelgauge)
 	}
 
 	pr_info("[FG] %s\n", str);
+#endif
 
 	max77705_fg_adaptation_wa(fuelgauge);
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	kfree(str);
+#endif
 }
 #endif
 
@@ -463,7 +467,7 @@ static int max77705_fg_read_soc(struct max77705_fuelgauge_data *fuelgauge)
 	}
 	soc = ((data[1] * 100) + (data[0] * 100 / 256)) / 10;
 
-#ifdef BATTERY_LOG_MESSAGE && defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
+#if defined(BATTERY_LOG_MESSAGE) && defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	pr_debug("%s: raw capacity (%d)\n", __func__, soc);
 
 	if (!(fuelgauge->info.pr_cnt % PRINT_COUNT)) {
@@ -491,9 +495,9 @@ static int max77705_fg_read_rawsoc(struct max77705_fuelgauge_data *fuelgauge)
 	}
 	soc = (data[1] * 100) + (data[0] * 100 / 256);
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	pr_debug("%s: raw capacity (0.01%%) (%d)\n", __func__, soc);
 
-#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	if (!(fuelgauge->info.pr_cnt % PRINT_COUNT))
 		pr_debug("%s: raw capacity (%d), data(0x%04x)\n",
 			 __func__, soc, (data[1] << 8) | data[0]);
@@ -1427,8 +1431,10 @@ static void max77705_fg_get_scaled_capacity(
 static void max77705_fg_get_atomic_capacity(
 	struct max77705_fuelgauge_data *fuelgauge, union power_supply_propval *val)
 {
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	pr_debug("%s : NOW(%d), OLD(%d)\n",
 		__func__, val->intval, fuelgauge->capacity_old);
+#endif
 
 	if (fuelgauge->pdata->capacity_calculation_type &
 	    SEC_FUELGAUGE_CAPACITY_TYPE_ATOMIC) {

@@ -349,9 +349,11 @@ temp_by_adc_goto:
 	else
 		value->intval = temp;
 
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT)
 	dev_info(battery->dev,
 		"%s:[%d] Temp(%d), Temp-ADC(%d)\n",
 		__func__,channel, temp, temp_adc);
+#endif
 
 	return true;
 }
