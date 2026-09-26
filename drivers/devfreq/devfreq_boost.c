@@ -15,9 +15,11 @@
 
 static unsigned long devfreq_boost_freq = CONFIG_DEVFREQ_EXYNOS_MIF_BOOST_FREQ;
 unsigned short devfreq_boost_dur = CONFIG_DEVFREQ_BOOST_DURATION_MS;
+unsigned short devfreq_boost_wake_dur = CONFIG_DEVFREQ_WAKE_BOOST_DURATION_MS;
 
 module_param(devfreq_boost_freq, long, 0644);
 module_param(devfreq_boost_dur, short, 0644);
+module_param(devfreq_boost_wake_dur, short, 0644);
 
 enum {
 	SCREEN_OFF,
@@ -95,6 +97,9 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 {
 	unsigned long boost_jiffies, curr_expires, new_expires;
 
+	if (disable_boost)
+		return;
+
 	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state))
 		return;
 
@@ -127,7 +132,7 @@ void devfreq_boost_kick_max(enum df_device device, unsigned int duration_ms)
 
 void devfreq_boost_kick_wake(enum df_device device)
 {
-	devfreq_boost_kick_max(device, CONFIG_DEVFREQ_WAKE_BOOST_DURATION_MS);
+	devfreq_boost_kick_max(device, devfreq_boost_wake_dur);
 }
 
 void devfreq_register_boost_device(enum df_device device, struct devfreq *df)
@@ -138,6 +143,25 @@ void devfreq_register_boost_device(enum df_device device, struct devfreq *df)
 	df->is_boost_device = true;
 	b = &d->devices[device];
 	WRITE_ONCE(b->df, df);
+}
+
+void devfreq_unregister_boost_device(enum df_device device)
+{
+	struct df_boost_drv *d = &df_boost_drv_g;
+	struct boost_dev *b = &d->devices[device];
+
+	cancel_delayed_work_sync(&b->device_unboost);
+	cancel_delayed_work_sync(&b->max_unboost);
+
+	if (b->df) {
+		b->df->is_boost_device = false;
+		WRITE_ONCE(b->df, NULL);
+	}
+
+	atomic_long_set(&b->max_boost_expires, 0);
+	clear_bit(LIGHT_BOOST, &b->state);
+	clear_bit(MAX_BOOST, &b->state);
+	wake_up(&b->boost_waitq);
 }
 
 static void devfreq_device_unboost(struct work_struct *work)
@@ -160,8 +184,14 @@ static void devfreq_max_unboost(struct work_struct *work)
 
 static void devfreq_update_boosts(struct boost_dev *b, unsigned long state)
 {
-	struct devfreq *df = b->df;
-	int first_freq_idx = df->profile->max_state - 1;
+	struct devfreq *df = READ_ONCE(b->df);
+	int first_freq_idx;
+
+	/* Boost device is not registered yet, or already unregistered */
+	if (!df)
+		return;
+
+	first_freq_idx = df->profile->max_state - 1;
 
 	mutex_lock(&df->lock);
 	if (state & BIT(SCREEN_OFF)) {
@@ -224,7 +254,7 @@ static int fb_notifier_cb(struct notifier_block *nb, unsigned long action,
 		if (*blank == FB_BLANK_UNBLANK) {
 			clear_bit(SCREEN_OFF, &b->state);
 			__devfreq_boost_kick_max(b,
-				CONFIG_DEVFREQ_WAKE_BOOST_DURATION_MS);
+				devfreq_boost_wake_dur);
 		} else {
 			set_bit(SCREEN_OFF, &b->state);
 			wake_up(&b->boost_waitq);

@@ -2258,7 +2258,7 @@ static int exynos_devfreq_probe(struct platform_device *pdev)
 		goto err_devfreq;
 	}
 
-	if (data->devfreq_type == DEVFREQ_MAX)
+	if (data->devfreq_type == DEVFREQ_EXYNOS_MIF)
 		devfreq_register_boost_device(DEVFREQ_EXYNOS_MIF, data->devfreq);
 
 	data->devfreq->min_freq = data->min_freq;
@@ -2428,6 +2428,9 @@ static int exynos_devfreq_remove(struct platform_device *pdev)
 	exynos_alt_unregister_notifier(&data->um_nb->nb);
 	exynos_devfreq_um_exit(data);
 #endif
+	if (data->devfreq_type == DEVFREQ_EXYNOS_MIF)
+		devfreq_unregister_boost_device(DEVFREQ_EXYNOS_MIF);
+
 	devfreq_remove_device(data->devfreq);
 #ifdef CONFIG_EXYNOS_DVFS_MANAGER
 	for (nr_constraint = 0; nr_constraint < data->nr_constraint; nr_constraint++) {
