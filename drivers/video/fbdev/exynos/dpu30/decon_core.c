@@ -1166,7 +1166,8 @@ out:
 int decon_doze_suspend(struct decon_device *decon)
 {
 	int ret = 0;
-#ifdef CONFIG_EXYNOS_LOG_CLEANUP_REVERT
+#if defined(CONFIG_EXYNOS_LOG_CLEANUP_REVERT) || \
+	defined(CONFIG_EXYNOS_DOZE_FIRST_FRAME_BLACK)
 	enum decon_state prev_state = decon->state;
 #endif
 	enum decon_state next_state = DECON_STATE_DOZE_SUSPEND;
