@@ -2355,7 +2355,6 @@ static ssize_t alpm_store(struct device *dev,
 {
 	int value, rc;
 	struct panel_device *panel = dev_get_drvdata(dev);
-	struct panel_info *panel_data = &panel->panel_data;
 
 	panel_info("++\n");
 	mutex_lock(&panel->io_lock);

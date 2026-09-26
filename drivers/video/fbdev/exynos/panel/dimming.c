@@ -156,7 +156,7 @@ s64 disp_round(s64 num, u32 digits)
 	return sign * (s64)tnum;
 }
 
-static s64 scale_down_round(s64 num, u32 digits)
+static s64 __maybe_unused scale_down_round(s64 num, u32 digits)
 {
 	int sign = (num < 0 ? -1 : 1);
 	u64 tnum, rem;
@@ -172,7 +172,7 @@ static s64 scale_down_round(s64 num, u32 digits)
 	return sign * (s64)(tnum + rem);
 }
 
-static s64 scale_down_rem(s64 num, u32 digits)
+static s64 __maybe_unused scale_down_rem(s64 num, u32 digits)
 {
 	int sign = (num < 0 ? -1 : 1);
 	u64 tnum, rem;

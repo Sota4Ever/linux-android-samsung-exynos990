@@ -26,7 +26,7 @@
 #define PANEL_PR_TAG	"brt"
 #endif
 
-static char *dim_type_str[MAX_DIM_TYPE_STR] = {
+static char *dim_type_str[MAX_DIM_TYPE_STR] __maybe_unused = {
 	[DIM_TYPE_STR_TABLE] = "table",
 	[DIM_TYPE_STR_FLASH] = "flash",
 	[DIM_TYPE_STR_GM2] = "gm2",

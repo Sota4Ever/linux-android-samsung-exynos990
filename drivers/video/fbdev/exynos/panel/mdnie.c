@@ -417,7 +417,6 @@ static int panel_set_mdnie(struct panel_device *panel)
 {
 	int ret;
 	struct mdnie_info *mdnie = &panel->mdnie;
-	int mdnie_mode = mdnie_current_state(mdnie);
 
 	if (panel == NULL) {
 		panel_err("panel is null\n");

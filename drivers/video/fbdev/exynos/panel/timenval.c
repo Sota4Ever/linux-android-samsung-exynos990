@@ -14,7 +14,7 @@
 int timenval_update_snapshot(struct timenval *tnv, int cur_value, struct timespec cur_ts)
 {
 	struct timespec delta_ts;
-	static u64 update_cnt;
+	static u64 update_cnt __maybe_unused;
 	s64 elapsed_msec;
 	int last_value;
 
@@ -58,7 +58,7 @@ int timenval_update_snapshot(struct timenval *tnv, int cur_value, struct timespe
 int timenval_update_average(struct timenval *tnv, int cur_value, struct timespec cur_ts)
 {
 	struct timespec delta_ts;
-	static u64 update_cnt;
+	static u64 update_cnt __maybe_unused;
 	s64 elapsed_msec;
 	int last_value;
 

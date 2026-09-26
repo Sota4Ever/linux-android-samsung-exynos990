@@ -70,7 +70,7 @@
 #include "./decon_board.h"
 #endif
 
-static char *panel_state_names[] = {
+static char *panel_state_names[] __maybe_unused = {
 	"OFF",		/* POWER OFF */
 	"ON",		/* POWER ON */
 	"NORMAL",	/* SLEEP OUT */
@@ -2062,7 +2062,7 @@ static int panel_sleep_in(struct panel_device *panel)
 {
 	int ret = 0;
 	struct panel_state *state = &panel->state;
-	enum panel_active_state prev_state = state->cur_state;
+	enum panel_active_state prev_state __maybe_unused = state->cur_state;
 
 	if (state->connect_panel == PANEL_DISCONNECT) {
 		panel_warn("panel no use\n");
@@ -2106,7 +2106,7 @@ static int panel_power_on(struct panel_device *panel)
 {
 	int ret = 0;
 	struct panel_state *state = &panel->state;
-	enum panel_active_state prev_state = state->cur_state;
+	enum panel_active_state prev_state __maybe_unused = state->cur_state;
 
 	if (panel->state.connect_panel == PANEL_DISCONNECT) {
 		panel_warn("panel no use\n");
@@ -2155,7 +2155,7 @@ static int panel_power_off(struct panel_device *panel)
 {
 	int ret = -EINVAL;
 	struct panel_state *state = &panel->state;
-	enum panel_active_state prev_state = state->cur_state;
+	enum panel_active_state prev_state __maybe_unused = state->cur_state;
 
 	if (state->connect_panel == PANEL_DISCONNECT) {
 		panel_warn("panel no use\n");
@@ -2201,7 +2201,7 @@ static int panel_sleep_out(struct panel_device *panel)
 	int ret = 0;
 	static int retry = 3;
 	struct panel_state *state = &panel->state;
-	enum panel_active_state prev_state = state->cur_state;
+	enum panel_active_state prev_state __maybe_unused = state->cur_state;
 
 	if (panel->state.connect_panel == PANEL_DISCONNECT) {
 		panel_warn("panel no use\n");
@@ -2307,7 +2307,7 @@ static int panel_doze(struct panel_device *panel, unsigned int cmd)
 {
 	int ret = 0;
 	struct panel_state *state = &panel->state;
-	enum panel_active_state prev_state = state->cur_state;
+	enum panel_active_state prev_state __maybe_unused = state->cur_state;
 
 	if (state->connect_panel == PANEL_DISCONNECT) {
 		panel_warn("panel no use\n");
