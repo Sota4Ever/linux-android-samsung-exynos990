@@ -258,8 +258,10 @@ any-prereq = $(filter-out $(PHONY),$?) $(filter-out $(PHONY) $(wildcard $^),$^)
 # Execute command if command has changed or prerequisite(s) are updated.
 if_changed = $(if $(strip $(any-prereq) $(arg-check)),                       \
 	@set -e;                                                             \
+	$(file >$(dot-target).cmdtmp,cmd_$@ := $(make-cmd))                  \
 	$(echo-cmd) $(cmd_$(1));                                             \
-	printf '%s\n' 'cmd_$@ := $(make-cmd)' > $(dot-target).cmd, @:)
+	cat $(dot-target).cmdtmp > $(dot-target).cmd;                        \
+	rm -f $(dot-target).cmdtmp, @:)
 
 # Execute the command and also postprocess generated .d dependencies file.
 if_changed_dep = $(if $(strip $(any-prereq) $(arg-check) ),                  \
@@ -269,10 +271,13 @@ if_changed_dep = $(if $(strip $(any-prereq) $(arg-check) ),                  \
 ifndef CONFIG_TRIM_UNUSED_KSYMS
 
 cmd_and_fixdep =                                                             \
+	$(file >$(dot-target).cmdtmp,cmd_$@ := $(make-cmd))                  \
 	$(echo-cmd) $(cmd_$(1));                                             \
-	scripts/basic/fixdep $(depfile) $@ '$(make-cmd)' > $(dot-target).tmp;\
+	scripts/basic/fixdep $(depfile) $@ '' > $(dot-target).tmp;\
 	rm -f $(depfile);                                                    \
-	mv -f $(dot-target).tmp $(dot-target).cmd;
+	cat $(dot-target).tmp > $(dot-target).cmd;                           \
+	cat $(dot-target).cmdtmp >> $(dot-target).cmd;                       \
+	rm -f $(dot-target).tmp $(dot-target).cmdtmp;
 
 else
 
@@ -292,12 +297,15 @@ ksym_dep_filter =                                                            \
 	esac | tr ";" "\n" | sed -n 's/^.*=== __KSYM_\(.*\) ===.*$$/_\1/p'
 
 cmd_and_fixdep =                                                             \
+	$(file >$(dot-target).cmdtmp,cmd_$@ := $(make-cmd))                  \
 	$(echo-cmd) $(cmd_$(1));                                             \
 	$(ksym_dep_filter) |                                                 \
-		scripts/basic/fixdep -e $(depfile) $@ '$(make-cmd)'          \
+		scripts/basic/fixdep -e $(depfile) $@ ''          \
 			> $(dot-target).tmp;	                             \
 	rm -f $(depfile);                                                    \
-	mv -f $(dot-target).tmp $(dot-target).cmd;
+	cat $(dot-target).tmp > $(dot-target).cmd;                           \
+	cat $(dot-target).cmdtmp >> $(dot-target).cmd;                       \
+	rm -f $(dot-target).tmp $(dot-target).cmdtmp;
 
 endif
 
